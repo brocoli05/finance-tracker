@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import DashboardClient from '@/components/DashboardClient'
+import TransactionsClient from '@/components/TransactionsClient'
 
 export default async function Page() {
   const supabase = await createClient()
@@ -8,5 +8,5 @@ export default async function Page() {
 
   if (!user) redirect('/login')
 
-  return <DashboardClient userEmail={user.email ?? ''} />
+  return <TransactionsClient userEmail={user.email ?? ''} />
 }
