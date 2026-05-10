@@ -1,0 +1,31 @@
+{
+  "data": [
+    {
+      "id": "goal-001",
+      "title": "Emergency Fund",
+      "target_amount": 10000,
+      "current_amount": 3500,
+      "deadline": "2026-12-31",
+      "category": "Savings",
+      "is_achieved": false
+    },
+    {
+      "id": "goal-002",
+      "title": "New Laptop",
+      "target_amount": 2000,
+      "current_amount": 850,
+      "deadline": "2026-08-01",
+      "category": "Electronics",
+      "is_achieved": false
+    },
+    {
+      "id": "goal-003",
+      "title": "Japan Trip",
+      "target_amount": 3500,
+      "current_amount": 3500,
+      "deadline": "2026-05-01",
+      "category": "Travel",
+      "is_achieved": true
+    }
+  ]
+}

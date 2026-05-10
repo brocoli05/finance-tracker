@@ -90,31 +90,41 @@ export async function GET() {
       ).join('; ')
     : 'No active goals'
 
-  // 5. Call Claude API
+  // 5. Call Claude API (skipped in E2E testing to avoid token costs and slow responses)
   let aiPrediction: AIPrediction
-  try {
-    const message = await anthropic.messages.create({
-      model: 'claude-haiku-4-5',
-      max_tokens: 400,
-      system: 'You are a personal finance analyst. Analyze spending patterns and predict end-of-month total. Always respond with valid JSON only, no other text.',
-      messages: [
-        {
-          role: 'user',
-          content:
-            `Today is day ${currentDay} of the month. Spent so far this month: $${spentThisMonth.toFixed(2)}. Daily average: $${dailyAverage.toFixed(2)}. Top categories: ${topCategories}. Active goals: ${goalsSummary}. Predict end-of-month total and give one specific action to reduce spending. Respond ONLY with this JSON: {"predictedMonthTotal": number, "goalAtRisk": boolean, "confidenceLevel": "high"|"medium"|"low", "suggestion": string, "estimatedSavings": number}`,
-        },
-      ],
-    })
-
-    const textBlock = message.content.find(b => b.type === 'text')
-    if (!textBlock || textBlock.type !== 'text') {
-      return Response.json({ data: null, error: 'No text response from AI' }, { status: 500 })
+  if (process.env.E2E_TESTING === 'true') {
+    aiPrediction = {
+      predictedMonthTotal: Math.round(spentThisMonth + dailyAverage * (31 - currentDay)),
+      goalAtRisk: false,
+      confidenceLevel: 'high',
+      suggestion: 'Reduce discretionary spending to stay within your monthly budget.',
+      estimatedSavings: 50,
     }
+  } else {
+    try {
+      const message = await anthropic.messages.create({
+        model: 'claude-haiku-4-5',
+        max_tokens: 400,
+        system: 'You are a personal finance analyst. Analyze spending patterns and predict end-of-month total. Always respond with valid JSON only, no other text.',
+        messages: [
+          {
+            role: 'user',
+            content:
+              `Today is day ${currentDay} of the month. Spent so far this month: $${spentThisMonth.toFixed(2)}. Daily average: $${dailyAverage.toFixed(2)}. Top categories: ${topCategories}. Active goals: ${goalsSummary}. Predict end-of-month total and give one specific action to reduce spending. Respond ONLY with this JSON: {"predictedMonthTotal": number, "goalAtRisk": boolean, "confidenceLevel": "high"|"medium"|"low", "suggestion": string, "estimatedSavings": number}`,
+          },
+        ],
+      })
 
-    aiPrediction = JSON.parse(textBlock.text) as AIPrediction
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : 'AI prediction failed'
-    return Response.json({ data: null, error: msg }, { status: 500 })
+      const textBlock = message.content.find(b => b.type === 'text')
+      if (!textBlock || textBlock.type !== 'text') {
+        return Response.json({ data: null, error: 'No text response from AI' }, { status: 500 })
+      }
+
+      aiPrediction = JSON.parse(textBlock.text) as AIPrediction
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'AI prediction failed'
+      return Response.json({ data: null, error: msg }, { status: 500 })
+    }
   }
 
   // 6. Save to predictions table (upsert handles the rare race condition of two requests on the same day)

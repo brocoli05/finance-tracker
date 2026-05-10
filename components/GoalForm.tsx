@@ -144,10 +144,11 @@ export default function GoalForm({ onSuccess, initialData }: Props) {
 
       {/* Deadline */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="goal-deadline" className="block text-sm font-medium text-gray-700 mb-1">
           Deadline <span className="text-rose-500">*</span>
         </label>
         <input
+          id="goal-deadline"
           type="date"
           value={form.deadline}
           min={today()}
@@ -159,10 +160,11 @@ export default function GoalForm({ onSuccess, initialData }: Props) {
 
       {/* Category */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="goal-category" className="block text-sm font-medium text-gray-700 mb-1">
           Category to Cut <span className="text-rose-500">*</span>
         </label>
         <select
+          id="goal-category"
           value={form.category}
           onChange={e => setField('category', e.target.value)}
           required

@@ -1,0 +1,84 @@
+{
+  "data": [
+    {
+      "id": "tx-001",
+      "amount": 3200.00,
+      "type": "income",
+      "category": "Payroll",
+      "subcategory": "",
+      "description": "Monthly salary",
+      "date": "2026-05-01",
+      "mood": "happy"
+    },
+    {
+      "id": "tx-002",
+      "amount": 85.50,
+      "type": "expense",
+      "category": "Food",
+      "subcategory": "Restaurant",
+      "description": "Dinner at Sushi Place",
+      "date": "2026-05-05",
+      "mood": "celebratory"
+    },
+    {
+      "id": "tx-003",
+      "amount": 1200.00,
+      "type": "expense",
+      "category": "Rent",
+      "subcategory": "",
+      "description": "May rent",
+      "date": "2026-05-01",
+      "mood": "stressed"
+    },
+    {
+      "id": "tx-004",
+      "amount": 45.00,
+      "type": "expense",
+      "category": "Utilities",
+      "subcategory": "Electric",
+      "description": "Electric bill",
+      "date": "2026-05-03",
+      "mood": ""
+    },
+    {
+      "id": "tx-005",
+      "amount": 120.00,
+      "type": "expense",
+      "category": "Clothes",
+      "subcategory": "",
+      "description": "Spring jacket",
+      "date": "2026-05-06",
+      "mood": "happy"
+    },
+    {
+      "id": "tx-006",
+      "amount": 500.00,
+      "type": "income",
+      "category": "Part-time tip",
+      "subcategory": "",
+      "description": "Weekend freelance",
+      "date": "2026-05-04",
+      "mood": ""
+    },
+    {
+      "id": "tx-007",
+      "amount": 35.99,
+      "type": "expense",
+      "category": "Hobbies",
+      "subcategory": "Gaming",
+      "description": "Steam game",
+      "date": "2026-05-07",
+      "mood": "bored"
+    },
+    {
+      "id": "tx-008",
+      "amount": 60.00,
+      "type": "expense",
+      "category": "Food",
+      "subcategory": "Groceries",
+      "description": "Weekly groceries",
+      "date": "2026-05-02",
+      "mood": ""
+    }
+  ]
+}

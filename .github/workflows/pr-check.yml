@@ -1,0 +1,167 @@
+name: PR Check
+
+on:
+  pull_request:
+    branches: [main]
+
+# Allow this workflow to post comments on the PR
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  test:
+    name: Unit + Integration Tests
+    runs-on: ubuntu-latest
+
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Run each suite with --json so we can parse structured results for the
+      # PR comment. continue-on-error lets both suites run even if one fails;
+      # we fail the job explicitly at the end if either suite failed.
+      - name: Run unit tests
+        id: unit
+        run: |
+          npx jest \
+            --testPathPattern="__tests__/unit" \
+            --coverage \
+            --ci \
+            --forceExit \
+            --json \
+            --outputFile=unit-results.json
+        continue-on-error: true
+
+      - name: Run integration tests
+        id: integration
+        run: |
+          npm run test:integration -- \
+            --ci \
+            --forceExit \
+            --json \
+            --outputFile=integration-results.json
+        continue-on-error: true
+
+      # Post (or update) a single comment on the PR with a results table.
+      # Using find-then-update prevents duplicate comments on re-runs.
+      - name: Find existing PR comment
+        id: find-comment
+        uses: actions/github-script@v7
+        with:
+          result-encoding: string
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const marker = '<!-- pr-check-results -->';
+            const existing = comments.find(c => c.body.includes(marker));
+            return existing ? String(existing.id) : '';
+
+      - name: Post test results comment
+        uses: actions/github-script@v7
+        env:
+          UNIT_OUTCOME: ${{ steps.unit.outcome }}
+          INTEGRATION_OUTCOME: ${{ steps.integration.outcome }}
+          EXISTING_COMMENT_ID: ${{ steps.find-comment.outputs.result }}
+        with:
+          script: |
+            const fs = require('fs');
+
+            function parseResults(file) {
+              try {
+                const raw = fs.readFileSync(file, 'utf8');
+                const data = JSON.parse(raw);
+                return {
+                  success:      data.success,
+                  passed:       data.numPassedTests,
+                  failed:       data.numFailedTests,
+                  skipped:      data.numPendingTests,
+                  total:        data.numTotalTests,
+                  passedSuites: data.numPassedTestSuites,
+                  totalSuites:  data.numTotalTestSuites,
+                };
+              } catch {
+                return null;
+              }
+            }
+
+            const unit        = parseResults('unit-results.json');
+            const integration = parseResults('integration-results.json');
+
+            const icon = (r, outcome) => {
+              if (outcome === 'failure' || (r && r.failed > 0)) return '❌';
+              if (outcome === 'success' && r && r.failed === 0)  return '✅';
+              return '⚠️';
+            };
+
+            const summary = (r, outcome) => {
+              if (!r) return outcome === 'skipped' ? 'Skipped' : 'No results (runner error)';
+              const pct = r.total > 0 ? Math.round((r.passed / r.total) * 100) : 0;
+              const parts = [`**${r.passed}/${r.total}** tests passed (${pct}%)`];
+              if (r.failed  > 0) parts.push(`${r.failed} failed`);
+              if (r.skipped > 0) parts.push(`${r.skipped} skipped`);
+              parts.push(`${r.passedSuites}/${r.totalSuites} suites`);
+              return parts.join(' · ');
+            };
+
+            const unitOutcome        = process.env.UNIT_OUTCOME;
+            const integrationOutcome = process.env.INTEGRATION_OUTCOME;
+            const overallOk = unitOutcome === 'success' && integrationOutcome === 'success';
+
+            const header = overallOk
+              ? '## ✅ All tests passed'
+              : '## ❌ Some tests failed';
+
+            const body = [
+              '<!-- pr-check-results -->',
+              header,
+              '',
+              '| Suite | Status | Details |',
+              '|-------|--------|---------|',
+              `| Unit Tests | ${icon(unit, unitOutcome)} | ${summary(unit, unitOutcome)} |`,
+              `| Integration Tests | ${icon(integration, integrationOutcome)} | ${summary(integration, integrationOutcome)} |`,
+              '',
+              '> E2E tests are skipped on PRs for speed — they run on merge to `main`.',
+              '',
+              `<sub>Commit \`${context.sha.slice(0, 7)}\` · Workflow run [#${context.runNumber}](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})</sub>`,
+            ].join('\n');
+
+            const commentId = process.env.EXISTING_COMMENT_ID;
+            if (commentId) {
+              await github.rest.issues.updateComment({
+                owner:      context.repo.owner,
+                repo:       context.repo.repo,
+                comment_id: Number(commentId),
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner:        context.repo.owner,
+                repo:         context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      # Fail the job if either test suite failed, so branch protection rules
+      # can block merging broken PRs.
+      - name: Fail if any tests failed
+        if: steps.unit.outcome == 'failure' || steps.integration.outcome == 'failure'
+        run: |
+          echo "One or more test suites failed — see the PR comment for details."
+          exit 1

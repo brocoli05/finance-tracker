@@ -125,7 +125,7 @@ export default function TransactionForm({ onSuccess, initialData }: Props) {
   const categories = CATEGORIES[form.type]
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} noValidate className="space-y-5">
 
       {/* Type toggle */}
       <div className="flex rounded-lg overflow-hidden border border-gray-200 w-fit">
@@ -167,10 +167,11 @@ export default function TransactionForm({ onSuccess, initialData }: Props) {
 
       {/* Category */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="tx-category" className="block text-sm font-medium text-gray-700 mb-1">
           Category <span className="text-rose-500">*</span>
         </label>
         <select
+          id="tx-category"
           value={form.category}
           onChange={e => setField('category', e.target.value)}
           required
@@ -213,10 +214,11 @@ export default function TransactionForm({ onSuccess, initialData }: Props) {
 
       {/* Date */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="tx-date" className="block text-sm font-medium text-gray-700 mb-1">
           Date <span className="text-rose-500">*</span>
         </label>
         <input
+          id="tx-date"
           type="date"
           value={form.date}
           onChange={e => setField('date', e.target.value)}

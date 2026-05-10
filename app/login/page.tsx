@@ -6,6 +6,9 @@ import { createClient } from '@/lib/supabase/client'
 
 type Mode = 'signin' | 'signup'
 
+const E2E_EMAIL    = process.env.NEXT_PUBLIC_TEST_USER_EMAIL    ?? 'e2e-test@example.com'
+const E2E_PASSWORD = process.env.NEXT_PUBLIC_TEST_USER_PASSWORD ?? 'testpassword123'
+
 export default function LoginPage() {
   const router = useRouter()
   const [mode, setMode]         = useState<Mode>('signin')
@@ -31,6 +34,15 @@ export default function LoginPage() {
 
     try {
       if (mode === 'signin') {
+        // E2E bypass: skip Supabase and use the cookie-based session stub
+        if (
+          process.env.NEXT_PUBLIC_E2E_TESTING === 'true' &&
+          email === E2E_EMAIL &&
+          password === E2E_PASSWORD
+        ) {
+          const res = await fetch('/api/e2e/login', { method: 'POST' })
+          if (res.ok) { router.replace('/'); return }
+        }
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) { setError(error.message); return }
         router.replace('/')
@@ -42,8 +54,10 @@ export default function LoginPage() {
         if (data.session) {
           router.replace('/')
         } else {
+          // Don't call switchMode() here — it would clear the notice we're about to set
+          setMode('signin')
+          setError(null)
           setNotice('Check your email to confirm your account, then sign in.')
-          switchMode('signin')
         }
       }
     } finally {
