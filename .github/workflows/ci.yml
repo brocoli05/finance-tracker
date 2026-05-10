@@ -24,7 +24,7 @@ jobs:
         run: npm ci
 
       - name: Run unit tests with coverage
-        run: npx jest --testPathPattern="__tests__/unit" --coverage --ci --forceExit
+        run: npx jest --testPathPatterns="__tests__/unit" --coverage --ci --forceExit
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
