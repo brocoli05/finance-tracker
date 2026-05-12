@@ -1,6 +1,7 @@
 // In-memory store for E2E testing, keyed by session ID so parallel tests don't interfere.
 // Only active when E2E_TESTING=true and e2e_session cookie is set.
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Rec = { [key: string]: any }
 
 const sessionStores = new Map<string, Map<string, Rec[]>>()
@@ -17,7 +18,9 @@ class E2EBuilder {
   private readonly _sid: string
   private readonly _table: string
   private _op: 'select' | 'insert' | 'update' | 'upsert' | 'delete' = 'select'
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _eqs: [string, any][] = []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _gtes: [string, any][] = []
   private _orderBy: string | null = null
   private _orderAsc = true
@@ -30,10 +33,12 @@ class E2EBuilder {
     this._table = table
   }
 
-  select(_fields = '*'): this { return this }
+  select(): this { return this }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   eq(field: string, val: any): this { this._eqs.push([field, val]); return this }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   gte(field: string, val: any): this { this._gtes.push([field, val]); return this }
 
   order(field: string, opts: { ascending?: boolean } = {}): this {
@@ -57,6 +62,7 @@ class E2EBuilder {
 
   delete(): this { this._op = 'delete'; return this }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   then<T>(resolve: (val: { data: any; error: null }) => T): Promise<T> {
     return Promise.resolve(this._run()).then(resolve)
   }
@@ -76,6 +82,7 @@ class E2EBuilder {
     )
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private _run(): { data: any; error: null } {
     const col = getTable(this._sid, this._table)
 

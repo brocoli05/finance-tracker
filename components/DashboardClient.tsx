@@ -304,7 +304,6 @@ export default function DashboardClient({ userEmail }: { userEmail: string }) {
   const [goalsLoading, setGoalsLoading]   = useState(true)
 
   useEffect(() => {
-    setTxLoading(true)
     fetch('/api/transactions')
       .then(r => r.json())
       .then(json => { if (json.data) setTransactions(json.data as Transaction[]) })
@@ -313,7 +312,6 @@ export default function DashboardClient({ userEmail }: { userEmail: string }) {
   }, [refreshKey])
 
   useEffect(() => {
-    setGoalsLoading(true)
     fetch('/api/goals')
       .then(r => r.json())
       .then(json => { if (json.data) setGoals(json.data as Goal[]) })
@@ -338,6 +336,7 @@ export default function DashboardClient({ userEmail }: { userEmail: string }) {
 
   function handleFormSuccess() {
     closeModal()
+    setTxLoading(true)
     setRefreshKey(k => k + 1)
   }
 
@@ -353,6 +352,7 @@ export default function DashboardClient({ userEmail }: { userEmail: string }) {
         return
       }
       setDeletingTx(null)
+      setTxLoading(true)
       setRefreshKey(k => k + 1)
     } catch {
       setDeleteError('Network error. Please try again.')

@@ -33,6 +33,7 @@ export async function createClient() {
     process.env.E2E_TESTING === 'true' &&
     cookieStore.get('e2e_session')?.value === 'true'
   ) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(client.auth as any).getUser = async () => ({
       data: {
         user: {
@@ -50,6 +51,7 @@ export async function createClient() {
     // Patch from() to use an isolated in-memory store so CRUD tests work
     // without a real Supabase session. The session ID isolates parallel tests.
     const sessionId = cookieStore.get('e2e_session_id')?.value ?? 'default'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ;(client as any).from = e2eFrom(sessionId)
   }
 

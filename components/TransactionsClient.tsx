@@ -300,7 +300,6 @@ export default function TransactionsClient({ userEmail }: { userEmail: string })
   const [filterTo, setFilterTo]             = useState<string>('')
 
   useEffect(() => {
-    setLoading(true)
     fetch('/api/transactions')
       .then(r => r.json())
       .then(json => { if (json.data) setTransactions(json.data as Transaction[]) })
@@ -325,6 +324,7 @@ export default function TransactionsClient({ userEmail }: { userEmail: string })
 
   function handleFormSuccess() {
     closeModal()
+    setLoading(true)
     setRefreshKey(k => k + 1)
   }
 
@@ -340,6 +340,7 @@ export default function TransactionsClient({ userEmail }: { userEmail: string })
         return
       }
       setDeletingTx(null)
+      setLoading(true)
       setRefreshKey(k => k + 1)
     } catch {
       setDeleteError('Network error. Please try again.')

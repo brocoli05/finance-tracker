@@ -265,7 +265,6 @@ export default function GoalsClient({ userEmail }: { userEmail: string }) {
   const [achievedOpen, setAchievedOpen] = useState(false)
 
   useEffect(() => {
-    setLoading(true)
     fetch('/api/goals')
       .then(r => r.json())
       .then(json => { if (json.data) setGoals(json.data as Goal[]) })
@@ -290,6 +289,7 @@ export default function GoalsClient({ userEmail }: { userEmail: string }) {
 
   function handleFormSuccess() {
     closeModal()
+    setLoading(true)
     setRefreshKey(k => k + 1)
   }
 
@@ -305,6 +305,7 @@ export default function GoalsClient({ userEmail }: { userEmail: string }) {
         return
       }
       setDeletingGoal(null)
+      setLoading(true)
       setRefreshKey(k => k + 1)
     } catch {
       setDeleteError('Network error. Please try again.')
@@ -329,6 +330,7 @@ export default function GoalsClient({ userEmail }: { userEmail: string }) {
         return
       }
       setSavingsGoal(null)
+      setLoading(true)
       setRefreshKey(k => k + 1)
     } catch {
       setSavingsError('Network error. Please try again.')
