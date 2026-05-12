@@ -128,7 +128,7 @@ export default function PredictionCard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-          Spending Prediction
+          Smart Prediction
         </h2>
         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full capitalize ${CONFIDENCE_STYLES[prediction.confidence_level]}`}>
           {prediction.confidence_level} confidence

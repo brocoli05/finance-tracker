@@ -15,7 +15,7 @@ test.describe('AI Prediction Card', () => {
   test('prediction card is present on the dashboard', async ({ page }) => {
     // The skeleton renders immediately; wait for the real card or error state
     await expect(
-      page.getByText('Spending Prediction')
+      page.getByText('Smart Prediction')
         .or(page.getByText('No prediction available.'))
         .or(page.getByText('Network error. Please try again.'))
     ).toBeVisible({ timeout: PREDICTION_TIMEOUT })
@@ -24,7 +24,7 @@ test.describe('AI Prediction Card', () => {
   test('prediction shows a projected spending total after loading', async ({ page }) => {
     // Wait until the prediction card exits loading state (skeleton gone, real content or error shown)
     await expect(
-      page.getByText('Spending Prediction')
+      page.getByText('Smart Prediction')
         .or(page.getByText('No prediction available.'))
         .or(page.getByText('Network error. Please try again.'))
         .or(page.locator('.bg-rose-50').filter({ hasText: /./  }))
@@ -48,10 +48,10 @@ test.describe('AI Prediction Card', () => {
 
   test('confidence level badge is visible when prediction loads', async ({ page }) => {
     await expect(
-      page.getByText('Spending Prediction').or(page.getByText('No prediction available.'))
+      page.getByText('Smart Prediction').or(page.getByText('No prediction available.'))
     ).toBeVisible({ timeout: PREDICTION_TIMEOUT })
 
-    const hasPrediction = await page.getByText('Spending Prediction').isVisible()
+    const hasPrediction = await page.getByText('Smart Prediction').isVisible()
     if (!hasPrediction) {
       test.skip()
       return
@@ -67,10 +67,10 @@ test.describe('AI Prediction Card', () => {
 
   test('AI suggestion box is rendered', async ({ page }) => {
     await expect(
-      page.getByText('Spending Prediction').or(page.getByText('No prediction available.'))
+      page.getByText('Smart Prediction').or(page.getByText('No prediction available.'))
     ).toBeVisible({ timeout: PREDICTION_TIMEOUT })
 
-    const hasPrediction = await page.getByText('Spending Prediction').isVisible()
+    const hasPrediction = await page.getByText('Smart Prediction').isVisible()
     if (!hasPrediction) {
       test.skip()
       return
