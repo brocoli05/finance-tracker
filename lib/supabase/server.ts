@@ -3,11 +3,18 @@ import { cookies } from 'next/headers'
 import { e2eFrom } from '@/lib/e2e-store'
 
 export async function createClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error(
+      `Supabase environment variable missing: URL=${supabaseUrl ?? '❌'}, KEY=${supabaseKey ?? '❌'}`
+    )
+  }
   const cookieStore = await cookies()
 
   const client = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl, supabaseKey,
     {
       cookies: {
         getAll() {
